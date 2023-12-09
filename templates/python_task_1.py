@@ -22,34 +22,58 @@ def generate_car_matrix(df)->pd.DataFrame:
     return matrix
 
 
-def get_type_count(df)->dict:
+def get_type_count(df) -> dict:
     """
     Categorizes 'car' values into types and returns a dictionary of counts.
 
     Args:
-        df (pandas.DataFrame)
+        df (pandas.DataFrame): Input DataFrame containing the 'car' column.
 
     Returns:
         dict: A dictionary with car types as keys and their counts as values.
     """
-    # Write your logic here
+    # Add a new categorical column 'car_type' based on 'car' values
+    df['car_type'] = pd.cut(df['car'], bins=[-float('inf'), 15, 25, float('inf')], labels=['low', 'medium', 'high'])
+    
+    # Calculate the count of occurrences for each car_type category
+    type_count = df['car_type'].value_counts().to_dict()
+    
+    # Sort the dictionary alphabetically based on keys
+    sorted_type_count = {k: type_count[k] for k in sorted(type_count)}
+    
+    return sorted_type_count
 
-    return dict()
+# Assuming 'dataset-1.csv' is in the same directory as your Python script
+# Load the CSV file into a DataFrame
+df = pd.read_csv('dataset-1.csv')
+
+# Use the function to get the count of car_type occurrences
+result = get_type_count(df)
+print(result)
 
 
-def get_bus_indexes(df)->list:
+
+def get_bus_indexes(df) -> list:
     """
-    Returns the indexes where the 'bus' values are greater than twice the mean.
+    Identifies indices where the 'bus' values are greater than twice the mean value of the 'bus' column.
 
     Args:
-        df (pandas.DataFrame)
+        df (pandas.DataFrame): Input DataFrame containing the 'bus' column.
 
     Returns:
-        list: List of indexes where 'bus' values exceed twice the mean.
+        list: A list of indices (sorted in ascending order) where 'bus' values are greater than twice the mean.
     """
-    # Write your logic here
+    # Calculate the mean of the 'bus' column
+    mean_bus = df['bus'].mean()
+    
+    # Identify indices where 'bus' values are greater than twice the mean
+    bus_indexes = df[df['bus'] > 2 * mean_bus].index.tolist()
+    
+    # Sort the indices in ascending order
+    bus_indexes.sort()
+    
+    return bus_indexes
 
-    return list()
 
 
 def filter_routes(df)->list:
