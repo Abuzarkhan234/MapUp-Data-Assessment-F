@@ -76,35 +76,45 @@ def get_bus_indexes(df) -> list:
 
 
 
-def filter_routes(df)->list:
+def filter_routes(df) -> list:
     """
-    Filters and returns routes with average 'truck' values greater than 7.
+    Filters routes based on the average of 'truck' column values and returns a sorted list of routes.
 
     Args:
-        df (pandas.DataFrame)
+        df (pandas.DataFrame): Input DataFrame containing the 'route' and 'truck' columns.
 
     Returns:
-        list: List of route names with average 'truck' values greater than 7.
+        list: A sorted list of values in the 'route' column for which the average of 'truck' column values is greater than 7.
     """
-    # Write your logic here
+    # Calculate the average of 'truck' column values for each route
+    route_avg_truck = df.groupby('route')['truck'].mean()
+    
+    # Filter routes where the average of 'truck' column values is greater than 7
+    filtered_routes = route_avg_truck[route_avg_truck > 7].index.tolist()
+    
+    # Sort the list of routes
+    filtered_routes.sort()
+    
+    return filtered_routes
 
-    return list()
 
-
-def multiply_matrix(matrix)->pd.DataFrame:
+def multiply_matrix(matrix_df) -> pd.DataFrame:
     """
-    Multiplies matrix values with custom conditions.
+    Modifies values in the input DataFrame based on specified conditions and returns the modified DataFrame.
 
     Args:
-        matrix (pandas.DataFrame)
+        matrix_df (pandas.DataFrame): Input DataFrame generated from Question 1.
 
     Returns:
-        pandas.DataFrame: Modified matrix with values multiplied based on custom conditions.
+        pandas.DataFrame: Modified DataFrame with values adjusted according to specified conditions.
     """
-    # Write your logic here
-
-    return matrix
-
+    # Apply value modifications based on conditions
+    modified_df = matrix_df.applymap(lambda x: x * 0.75 if x > 20 else x * 1.25)
+    
+    # Round values to 1 decimal place
+    modified_df = modified_df.round(1)
+    
+    return modified_df
 
 def time_check(df)->pd.Series:
     """
@@ -116,6 +126,14 @@ def time_check(df)->pd.Series:
     Returns:
         pd.Series: return a boolean series
     """
-    # Write your logic here
+     # Convert 'timestamp' column to datetime format
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-    return pd.Series()
+    # Extract day and time components
+    df['day'] = df['timestamp'].dt.day_name()
+    df['time'] = df['timestamp'].dt.time
+
+    # Group by 'id' and 'id_2', check if the timestamps cover a full 24-hour period and span all 7 days
+    completeness_check = df.groupby(['id', 'id_2']).apply(lambda x: (set(x['day']) == set(calendar.day_name)) and (x['time'].min() <= pd.Timestamp('23:59:59').time()) and (x['time'].max() >= pd.Timestamp('00:00:00').time()))
+
+    return completeness_check
